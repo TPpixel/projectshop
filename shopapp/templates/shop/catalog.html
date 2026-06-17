@@ -41,8 +41,8 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Применить</button>
-                    <a href="{% url 'catalog' %}" class="btn btn-outline-secondary w-100 mt-2">Сбросить</a>
+                    <button type="submit" class="btn btn-dark w-100">Применить</button>
+                    <a href="{% url 'catalog' %}" class="btn btn-outline-dark w-100 mt-2">Сбросить</a>
                 </form>
             </div>
         </div>
@@ -83,13 +83,13 @@
                 <nav>
                     <ul class="pagination justify-content-center">
                         {% if page_obj.has_previous %}
-                            <li class="page-item"><a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">&laquo;</a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">{{ page_obj.previous_page_number }}</a></li>
+                            <li class="page-item"><a class="page-link bg-white text-dark" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">&laquo;</a></li>
+                            <li class="page-item"><a class="page-link bg-white text-dark" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">{{ page_obj.previous_page_number }}</a></li>
                         {% endif %}
-                        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                        <li class="page-item active"><span class="page-link bg-white text-dark">{{ page_obj.number }}</span></li>
                         {% if page_obj.has_next %}
-                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">{{ page_obj.next_page_number }}</a></li>
-                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">&raquo;</a></li>
+                            <li class="page-item"><a class="page-link bg-white text-dark" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">{{ page_obj.next_page_number }}</a></li>
+                            <li class="page-item"><a class="page-link bg-white text-dark" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">&raquo;</a></li>
                         {% endif %}
                     </ul>
                 </nav>
