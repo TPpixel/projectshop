@@ -21,13 +21,20 @@
                     <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'catalog' %}">Каталог</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'cart_view' %}">Корзина</a></li>
-                </ul>
-                <div class="d-flex">
                     {% if user.is_authenticated %}
-                        <span class="text-light me-3">{{ user.username }}</span>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Кабинет</a></li>
+                    {% endif %}
+                </ul>
+                <div class="d-flex align-items-center">
+                    {% if user.is_authenticated %}
+                        {% if user.profile.роль == 'ADMIN' or user.profile.роль == 'MANAGER' %}
+                            <span class="badge bg-light text-dark me-2">{{ user.profile.get_роль_display }}</span>
+                        {% endif %}
+                        <span class="text-light me-2">{{ user.username }}</span>
                         <a href="{% url 'logout' %}?next=/" class="btn btn-outline-light btn-sm">Выйти</a>
                     {% else %}
-                        <a href="{% url 'login' %}?next=/" class="btn btn-outline-light btn-sm">Войти</a>
+                        <a href="{% url 'login' %}?next=/" class="btn btn-outline-light btn-sm me-2">Войти</a>
+                        <a href="{% url 'register' %}" class="btn btn-light btn-sm">Регистрация</a>
                     {% endif %}
                 </div>
             </div>

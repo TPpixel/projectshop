@@ -92,3 +92,20 @@ class OrderItem(models.Model):
 
     def стоимость(self):
         return self.цена * self.количество
+
+
+class Profile(models.Model):
+    ROLE_CHOICES = [
+        ('CUSTOMER', 'Покупатель'),
+        ('MANAGER', 'Менеджер'),
+        ('ADMIN', 'Администратор'),
+    ]
+    пользователь = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    роль = models.CharField(max_length=20, choices=ROLE_CHOICES, default='CUSTOMER')
+    полное_имя = models.CharField(max_length=150, blank=True)
+    телефон = models.CharField(max_length=20, blank=True)
+    город_доставки = models.CharField(max_length=100, blank=True)
+    любимая_категория = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return f"Профиль {self.пользователь.username} ({self.get_роль_display()})"

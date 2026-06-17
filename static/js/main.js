@@ -1,3 +1,15 @@
+const origFetch = window.fetch;
+window.fetch = function(url, opts) {
+    return origFetch(url, opts).then(res => {
+        if (res.status === 401) {
+            showToast('Необходимо войти в систему', 'warning');
+        } else if (res.status === 403) {
+            showToast('Недостаточно прав', 'danger');
+        }
+        return res;
+    });
+};
+
 function getCSRFToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     if (meta) return meta.getAttribute('content');

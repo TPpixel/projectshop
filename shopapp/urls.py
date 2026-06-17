@@ -10,6 +10,7 @@ router.register(r'api/baskets', views.BasketViewSet)
 router.register(r'api/basket-items', views.BasketItemViewSet)
 router.register(r'api/orders', views.OrderViewSet)
 router.register(r'api/order-items', views.OrderItemViewSet)
+router.register(r'api/profiles', views.ProfileViewSet)
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -20,4 +21,7 @@ urlpatterns = [
     path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('cart/', views.cart_view, name='cart_view'),
     path('checkout/', views.checkout, name='checkout'),
+    path('register/', views.register, name='register'),
+    path('profile/', views.profile, name='profile'),
+    path('api/me/', views.me, name='api_me'),
 ] + router.urls

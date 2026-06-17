@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Category, Manufacturer, Product, Basket, BasketItem, Order, OrderItem
+from django.contrib.auth.models import User
+from .models import Category, Manufacturer, Product, Basket, BasketItem, Order, OrderItem, Profile
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -47,3 +48,30 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = '__all__'
+        read_only_fields = ['пользователь']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'profile']
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        if profile_data:
+            profile = instance.profile
+            for attr, value in profile_data.items():
+                setattr(profile, attr, value)
+            profile.save()
+        return instance

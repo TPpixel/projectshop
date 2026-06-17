@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Личный кабинет — PixelMarket{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Главная</a></li>
+            <li class="breadcrumb-item active">Личный кабинет</li>
+        </ol>
+    </nav>
+
+    <h1>Личный кабинет</h1>
+
+    <div class="row">
+        <div class="col-md-5 mb-4">
+            <div class="card p-4">
+                <h4>Профиль</h4>
+                <div id="profile-info">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-dark" role="status"></div>
+                    </div>
+                </div>
+                <hr>
+                <form id="profile-form" style="display:none;">
+                    <div class="mb-2">
+                        <label class="form-label">Полное имя</label>
+                        <input type="text" name="полное_имя" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Телефон</label>
+                        <input type="text" name="телефон" class="form-control">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Город доставки</label>
+                        <input type="text" name="город_доставки" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100 mt-2">Сохранить</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-7 mb-4">
+            <div class="card p-4">
+                <h4>Мои заказы</h4>
+                {% if orders %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Дата</th>
+                                    <th>Сумма</th>
+                                    <th>Адрес</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                    <tr>
+                                        <td>#{{ order.id }}</td>
+                                        <td>{{ order.дата_создания|date:"d.m.Y" }}</td>
+                                        <td>{{ order.общая_стоимость }} BYN</td>
+                                        <td>{{ order.адрес_доставки|truncatechars:30 }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#order-{{ order.id }}">Подробнее</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="collapse" id="order-{{ order.id }}">
+                                        <td colspan="5">
+                                            <table class="table table-sm mb-0">
+                                                <thead>
+                                                    <tr><th>Товар</th><th>Цена</th><th>Кол-во</th><th>Сумма</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for item in order.позиции.all %}
+                                                        <tr>
+                                                            <td>{{ item.название_товара }}</td>
+                                                            <td>{{ item.цена }} BYN</td>
+                                                            <td>{{ item.количество }}</td>
+                                                            <td>{{ item.стоимость }} BYN</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">У вас ещё нет заказов.</p>
+                    <a href="{% url 'catalog' %}" class="btn btn-dark">Перейти в каталог</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const infoDiv = document.getElementById('profile-info');
+    const form = document.getElementById('profile-form');
+
+    fetch('/api/me/')
+        .then(r => r.json())
+        .then(data => {
+            const p = data.profile || {};
+            const roleMap = { CUSTOMER: 'Покупатель', MANAGER: 'Менеджер', ADMIN: 'Администратор' };
+            const isAdmin = data.profile && (data.profile.роль === 'ADMIN' || data.profile.роль === 'MANAGER');
+            infoDiv.innerHTML = `
+                <p><strong>Логин:</strong> ${data.username}</p>
+                <p><strong>Email:</strong> ${data.email || '—'}</p>
+                <p><strong>Роль:</strong> <span class="badge bg-dark">${roleMap[p.роль] || p.роль || 'Покупатель'}</span></p>
+                <p><strong>Полное имя:</strong> ${p.полное_имя || '—'}</p>
+                <p><strong>Телефон:</strong> ${p.телефон || '—'}</p>
+                <p><strong>Город доставки:</strong> ${p.город_доставки || '—'}</p>
+                ${isAdmin ? '<p class="text-muted small">У вас есть права на управление каталогом</p>' : ''}
+                <button class="btn btn-outline-dark btn-sm" onclick="document.getElementById('profile-form').style.display='block'; this.style.display='none'">Редактировать</button>
+            `;
+            if (p.полное_имя) form.querySelector('[name="полное_имя"]').value = p.полное_имя;
+            if (p.телефон) form.querySelector('[name="телефон"]').value = p.телефон;
+            if (p.город_доставки) form.querySelector('[name="город_доставки"]').value = p.город_доставки;
+        })
+        .catch(() => {
+            infoDiv.innerHTML = '<div class="alert alert-danger">Ошибка загрузки профиля</div>';
+        });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const data = { profile: {} };
+        data.profile['полное_имя'] = form.querySelector('[name="полное_имя"]').value;
+        data.profile['телефон'] = form.querySelector('[name="телефон"]').value;
+        data.profile['город_доставки'] = form.querySelector('[name="город_доставки"]').value;
+        fetch('/api/me/', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
+            body: JSON.stringify(data),
+        })
+        .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+        .then(() => { showToast('Профиль обновлён', 'success'); location.reload(); })
+        .catch(() => showToast('Ошибка сохранения', 'danger'));
+    });
+});
+</script>
+{% endblock %}

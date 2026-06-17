@@ -9,13 +9,16 @@ from django.conf import settings
 from django.contrib import messages
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Product, Category, Manufacturer, Basket, BasketItem, Order, OrderItem
+from rest_framework import viewsets, status
+from rest_framework.decorators import action, api_view
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, SAFE_METHODS
+from django.contrib.auth.models import User
+from .models import Product, Category, Manufacturer, Basket, BasketItem, Order, OrderItem, Profile
 from .serializers import (CategorySerializer, ManufacturerSerializer,
                           ProductSerializer, BasketSerializer,
                           BasketItemSerializer, OrderSerializer,
-                          OrderItemSerializer)
+                          OrderItemSerializer, UserSerializer, ProfileSerializer)
 
 
 def index(request):
@@ -202,43 +205,135 @@ def checkout(request):
     return render(request, 'shop/checkout.html')
 
 
+class IsAdminOrReadOnly(IsAuthenticatedOrReadOnly):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        if not request.user.is_authenticated:
+            return False
+        role = getattr(getattr(request.user, 'profile', None), 'роль', None)
+        return request.user.is_staff or role in ('ADMIN', 'MANAGER')
+
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class ManufacturerViewSet(viewsets.ModelViewSet):
     queryset = Manufacturer.objects.all()
     serializer_class = ManufacturerSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class BasketViewSet(viewsets.ModelViewSet):
     queryset = Basket.objects.all()
     serializer_class = BasketSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        role = getattr(getattr(self.request.user, 'profile', None), 'роль', None)
+        if self.request.user.is_staff or role in ('ADMIN', 'MANAGER'):
+            return qs
+        return qs.filter(пользователь=self.request.user)
 
 
 class BasketItemViewSet(viewsets.ModelViewSet):
     queryset = BasketItem.objects.all()
     serializer_class = BasketItemSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        role = getattr(getattr(self.request.user, 'profile', None), 'роль', None)
+        if self.request.user.is_staff or role in ('ADMIN', 'MANAGER'):
+            return qs
+        return qs.filter(корзина__пользователь=self.request.user)
 
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        role = getattr(getattr(self.request.user, 'profile', None), 'роль', None)
+        if self.request.user.is_staff or role in ('ADMIN', 'MANAGER'):
+            return qs
+        return qs.filter(пользователь=self.request.user)
 
 
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        role = getattr(getattr(self.request.user, 'profile', None), 'роль', None)
+        if self.request.user.is_staff or role in ('ADMIN', 'MANAGER'):
+            return qs
+        return qs.filter(заказ__пользователь=self.request.user)
+
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        role = getattr(getattr(self.request.user, 'profile', None), 'роль', None)
+        if self.request.user.is_staff or role in ('ADMIN', 'MANAGER'):
+            return qs
+        return qs.filter(пользователь=self.request.user)
+
+
+@api_view(['GET', 'PATCH'])
+def me(request):
+    if not request.user.is_authenticated:
+        return Response({'detail': 'Не авторизован'}, status=status.HTTP_401_UNAUTHORIZED)
+    user = request.user
+    if request.method == 'GET':
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+    serializer = UserSerializer(user, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def register(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+        if password != password2:
+            return render(request, 'registration/register.html', {'error': 'Пароли не совпадают'})
+        if User.objects.filter(username=username).exists():
+            return render(request, 'registration/register.html', {'error': 'Пользователь уже существует'})
+        user = User.objects.create_user(username=username, email=email, password=password)
+        Profile.objects.create(пользователь=user)
+        from django.contrib.auth import login
+        login(request, user)
+        return redirect('index')
+    return render(request, 'registration/register.html')
+
+
+@login_required
+def profile(request):
+    orders = Order.objects.filter(пользователь=request.user).order_by('-дата_создания')
+    return render(request, 'shop/profile.html', {
+        'orders': orders,
+    })
