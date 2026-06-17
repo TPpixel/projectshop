@@ -5,3 +5,7 @@ db.sqlite3
 media/
 .DS_Store
 icon.png
+.env
+staticfiles/
+__pycache__/
+*.pyc
