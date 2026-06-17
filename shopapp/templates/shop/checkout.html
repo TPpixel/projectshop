@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформление заказа</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Магазин</a>
+            <div class="d-flex">
+                <a href="{% url 'product_list' %}" class="btn btn-outline-light">Каталог</a>
+                <a href="{% url 'cart_view' %}" class="btn btn-outline-light ms-2">Корзина</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <h1>Оформление заказа</h1>
+
+        {% if error %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="address" class="form-label">Адрес доставки</label>
+                <textarea name="address" id="address" class="form-control" rows="3" placeholder="Введите адрес доставки" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success btn-lg">Подтвердить заказ</button>
+        </form>
+    </div>
+</body>
+</html>

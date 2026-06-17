@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from decimal import Decimal
 
 
 class Category(models.Model):
@@ -67,3 +68,27 @@ class BasketItem(models.Model):
     def clean(self):
         if self.количество > self.товар.количество_на_складе:
             raise ValidationError("Количество превышает остаток на складе")
+
+
+class Order(models.Model):
+    пользователь = models.ForeignKey(User, on_delete=models.CASCADE)
+    адрес_доставки = models.CharField(max_length=300)
+    дата_создания = models.DateTimeField(auto_now_add=True)
+    общая_стоимость = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+
+    def __str__(self):
+        return f"Заказ #{self.id} — {self.пользователь.username} ({self.дата_создания:%d.%m.%Y})"
+
+
+class OrderItem(models.Model):
+    заказ = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='позиции')
+    товар = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    название_товара = models.CharField(max_length=200)
+    цена = models.DecimalField(max_digits=10, decimal_places=2)
+    количество = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.название_товара} x{self.количество}"
+
+    def стоимость(self):
+        return self.цена * self.количество

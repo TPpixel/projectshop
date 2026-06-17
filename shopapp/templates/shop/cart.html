@@ -20,6 +20,12 @@
     <div class="container my-4">
         <h1>Корзина пользователя {{ user.username }}</h1>
 
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+
         {% if items %}
             <table class="table table-striped">
                 <thead>
@@ -61,6 +67,7 @@
                     </tr>
                 </tfoot>
             </table>
+            <a href="{% url 'checkout' %}" class="btn btn-success btn-lg mt-3">Оформить заказ</a>
         {% else %}
             <p class="text-muted">Корзина пуста.</p>
             <a href="{% url 'product_list' %}" class="btn btn-primary">Перейти в каталог</a>
