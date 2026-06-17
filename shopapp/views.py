@@ -8,7 +8,13 @@ from django.conf import settings
 from django.contrib import messages
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from .models import Product, Category, Manufacturer, Basket, BasketItem, Order, OrderItem
+from .serializers import (CategorySerializer, ManufacturerSerializer,
+                          ProductSerializer, BasketSerializer,
+                          BasketItemSerializer, OrderSerializer,
+                          OrderItemSerializer)
 
 
 def hello_world(request):
@@ -184,3 +190,45 @@ def checkout(request):
         return redirect('cart_view')
 
     return render(request, 'shop/checkout.html')
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class ManufacturerViewSet(viewsets.ModelViewSet):
+    queryset = Manufacturer.objects.all()
+    serializer_class = ManufacturerSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class BasketViewSet(viewsets.ModelViewSet):
+    queryset = Basket.objects.all()
+    serializer_class = BasketSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class BasketItemViewSet(viewsets.ModelViewSet):
+    queryset = BasketItem.objects.all()
+    serializer_class = BasketItemSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+
+class OrderItemViewSet(viewsets.ModelViewSet):
+    queryset = OrderItem.objects.all()
+    serializer_class = OrderItemSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
