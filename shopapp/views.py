@@ -186,9 +186,9 @@ def checkout(request):
         output.seek(0)
 
         email = EmailMessage(
-            subject=f'Чек заказа #{order.id} — {settings.EMAIL_HOST_USER}',
+            subject=f'Чек заказа #{order.id} — PixelMarket',
             body=f'Спасибо за покупку!\n\nНомер заказа: #{order.id}\nАдрес доставки: {address}\nОбщая стоимость: {total} BYN\n\nЧек прикреплён к письму.',
-            from_email=settings.EMAIL_HOST_USER,
+            from_email=settings.DEFAULT_FROM_EMAIL,
             to=[request.user.email],
         )
         email.attach(f'check_{order.id}.xlsx', output.read(), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
