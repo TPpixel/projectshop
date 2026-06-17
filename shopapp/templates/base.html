@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}PixelMarket{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">PixelMarket</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'catalog' %}">Каталог</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'cart_view' %}">Корзина</a></li>
+                </ul>
+                <div class="d-flex">
+                    {% if user.is_authenticated %}
+                        <span class="text-light me-3">{{ user.username }}</span>
+                        <a href="{% url 'logout' %}?next=/" class="btn btn-outline-light btn-sm">Выйти</a>
+                    {% else %}
+                        <a href="{% url 'login' %}?next=/" class="btn btn-outline-light btn-sm">Войти</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="text-white text-center py-4 mt-5">
+        <div class="container">
+            <p class="mb-1">&copy; 2026 PixelMarket — Интернет-магазин электроники</p>
+            <small class="text-muted">Все права защищены</small>
+        </div>
+    </footer>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

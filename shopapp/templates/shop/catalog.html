@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Каталог — PixelMarket{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Главная</a></li>
+            <li class="breadcrumb-item active">Каталог</li>
+        </ol>
+    </nav>
+
+    <h1>Каталог товаров</h1>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="filter-sidebar card p-3 mb-4">
+                <h5>Фильтры</h5>
+                <form method="get">
+                    <div class="mb-3">
+                        <label class="form-label">Поиск</label>
+                        <input type="text" name="q" class="form-control" placeholder="Название..." value="{{ request.GET.q }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Категория</label>
+                        <select name="category" class="form-select">
+                            <option value="">Все</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.название }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Производитель</label>
+                        <select name="manufacturer" class="form-select">
+                            <option value="">Все</option>
+                            {% for m in manufacturers %}
+                                <option value="{{ m.id }}" {% if request.GET.manufacturer == m.id|stringformat:"s" %}selected{% endif %}>{{ m.название }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Применить</button>
+                    <a href="{% url 'catalog' %}" class="btn btn-outline-secondary w-100 mt-2">Сбросить</a>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div id="loading-spinner" class="spinner-overlay">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+            </div>
+
+            <div id="product-grid" class="row">
+                {% for product in page_obj %}
+                    <div class="col-sm-6 col-lg-4 mb-4">
+                        <div class="card h-100 {% if product.количество_на_складе == 0 %}out-of-stock{% endif %}">
+                            <img src="{{ product.фото_товара.url }}" class="card-img-top product-img" alt="{{ product.название }}">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ product.название }}</h5>
+                                <p class="text-muted small">{{ product.категория.название }}</p>
+                                <p class="fw-bold fs-5 mt-auto">{{ product.цена }} BYN</p>
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-info flex-grow-1">Подробнее</a>
+                                    {% if product.количество_на_складе > 0 %}
+                                        <button class="btn btn-success flex-grow-1" onclick="addToCart({{ product.id }})">В корзину</button>
+                                    {% else %}
+                                        <button class="btn btn-secondary flex-grow-1" disabled>Нет в наличии</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12"><p class="text-muted">Товары не найдены.</p></div>
+                {% endfor %}
+            </div>
+
+            {% if page_obj.paginator.num_pages > 1 %}
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item"><a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">&laquo;</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">{{ page_obj.previous_page_number }}</a></li>
+                        {% endif %}
+                        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+                        {% if page_obj.has_next %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">{{ page_obj.next_page_number }}</a></li>
+                            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if request.GET.manufacturer %}&manufacturer={{ request.GET.manufacturer }}{% endif %}">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('form[method="get"]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                document.getElementById('loading-spinner')?.classList.add('active');
+            });
+        });
+    });
+</script>
+{% endblock %}

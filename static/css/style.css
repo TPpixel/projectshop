@@ -1,0 +1,77 @@
+.hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 80px 0;
+    margin-top: -1.5rem;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.product-img {
+    height: 220px;
+    object-fit: contain;
+    padding: 1rem;
+}
+
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+}
+
+.filter-sidebar {
+    position: sticky;
+    top: 1rem;
+}
+
+.toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1080;
+}
+
+.spinner-overlay {
+    display: none;
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.spinner-overlay.active {
+    display: block;
+}
+
+footer {
+    background: #1a1a2e;
+}
+
+.category-card {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+
+.category-card:hover {
+    background: #f0f0ff;
+}
+
+.out-of-stock {
+    opacity: 0.6;
+}

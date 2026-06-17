@@ -12,8 +12,8 @@ router.register(r'api/orders', views.OrderViewSet)
 router.register(r'api/order-items', views.OrderItemViewSet)
 
 urlpatterns = [
-    path('', views.hello_world, name='hello_world'),
-    path('catalog/', views.product_list, name='product_list'),
+    path('', views.index, name='index'),
+    path('catalog/', views.catalog, name='catalog'),
     path('catalog/<int:pk>/', views.product_detail, name='product_detail'),
     path('cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('cart/update/<int:item_id>/', views.update_cart, name='update_cart'),

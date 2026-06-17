@@ -4,6 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.core.mail import EmailMessage
+from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib import messages
 from openpyxl import Workbook
@@ -17,11 +18,16 @@ from .serializers import (CategorySerializer, ManufacturerSerializer,
                           OrderItemSerializer)
 
 
-def hello_world(request):
-    return render(request, 'index.html')
+def index(request):
+    popular = Product.objects.order_by('?')[:6]
+    categories = Category.objects.all()
+    return render(request, 'shop/index.html', {
+        'popular_products': popular,
+        'categories': categories,
+    })
 
 
-def product_list(request):
+def catalog(request):
     products = Product.objects.all()
     categories = Category.objects.all()
     manufacturers = Manufacturer.objects.all()
@@ -39,8 +45,12 @@ def product_list(request):
             Q(название__icontains=query) | Q(описание__icontains=query)
         )
 
-    return render(request, 'shop/product_list.html', {
-        'products': products,
+    paginator = Paginator(products, 9)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'shop/catalog.html', {
+        'page_obj': page_obj,
         'categories': categories,
         'manufacturers': manufacturers,
     })
